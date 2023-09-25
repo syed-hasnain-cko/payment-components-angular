@@ -7,11 +7,6 @@ import { environment } from 'src/environments/environment.sandbox';
   providedIn: 'root'
 })
 export class CheckoutService {
-
- 
-  authorization = environment.checkoutSecretKey;
-
-  baseURL = 'https://api.sandbox.checkout.com'
  
   constructor(private http:HttpClient) { 
 
@@ -20,8 +15,8 @@ export class CheckoutService {
   requestPaymentSession(body:any):Observable<any>{
 
     let httpOptions = {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': this.authorization})
+      headers: new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': environment.checkoutSecretKey})
     };
-    return this.http.post<any>(`${this.baseURL}/payment-sessions`, body , httpOptions);
+    return this.http.post<any>(`${environment.baseUrl}/payment-sessions`, body , httpOptions);
   }
 }

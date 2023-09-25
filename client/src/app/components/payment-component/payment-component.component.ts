@@ -1,8 +1,123 @@
-import { ChangeDetectorRef, Component, OnInit, Renderer2 } from '@angular/core';
+// import { ChangeDetectorRef, Component, OnInit, Renderer2 } from '@angular/core';
+// import { CheckoutService } from 'src/app/services/checkout.service';
+// import { from } from 'rxjs';
+// import { environment } from 'src/environments/environment.sandbox';
+// import { COUNTRIES, CURRENCIES } from 'src/app/data-store';
+// import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+
+
+
+// declare var CheckoutWebComponents: any;
+
+// @Component({
+//   selector: 'app-payment-component',
+//   templateUrl: './payment-component.component.html',
+//   styleUrls: ['./payment-component.component.scss']
+// })
+
+// export class PaymentComponentComponent implements OnInit {
+
+//   Currencies = CURRENCIES.map(currency => currency.iso4217);
+//   Countries = COUNTRIES;
+//   baseUrl = window.location.origin
+
+
+//   constructor(private checkoutService: CheckoutService, private cd:ChangeDetectorRef) { }
+
+//     detailsForm = new FormGroup({
+//     name: new FormControl('Syed Hasnain',[Validators.required, Validators.pattern('[a-zA-Z ]*')]),
+//     email: new FormControl('smhasnain1996@gmail.com',[Validators.required, Validators.minLength(6), Validators.email]),
+//     amount: new FormControl('1000', [Validators.required,Validators.max(50000)]),
+//     currency: new FormControl('EUR',[Validators.required]),
+//     country: new FormControl('DE',[Validators.required]),
+//     threeDS: new FormControl(true),
+//     capture: new FormControl(true)
+//   })
+
+//   ngOnInit() {
+//      this.initializePaymentForm();
+//   }
+
+
+//   async initializePaymentForm() {
+
+//     let paymentSession = {};
+//     let paymentSessionRequestBody = {
+//       "amount": 1000,
+//       "currency": this.detailsForm.controls.currency.value,
+//       "reference": "Order_"+ Math.floor(Math.random() * 1000) + 1,
+//       "3ds":{
+//         "enabled":this.detailsForm.controls.threeDS.value
+//       },
+//       "capture":this.detailsForm.controls.capture.value,
+//       "billing": {
+//         "address": {
+//           "country": this.detailsForm.controls.country.value
+//         }
+//       },
+//       "customer": {
+//         "name": this.detailsForm.controls.name.value,
+//         "email": this.detailsForm.controls.email.value
+//       },
+//       "success_url": `${this.baseUrl}/success`,
+//       "failure_url": `${this.baseUrl}/failure`,
+//       "processing_channel_id":environment.processingChannelId
+//     }
+
+//    const session = await from(this.checkoutService.requestPaymentSession(paymentSessionRequestBody)).toPromise()
+//    paymentSession = session;
+
+//     const checkoutWebComponents = await CheckoutWebComponents({
+    
+//       publicKey: environment.checkoutPublicKey,
+//       environment: environment.environment,
+//       paymentSession,
+//       onPaymentCompleted: (paymentResponse: any, paymentMethod: any) => {
+//         const element = document.getElementById("successful-payment-message");
+//         if(element)
+//         element.innerHTML = `
+//           ${paymentMethod.type} completed <br>
+//           Your payment id is: <span class="payment-id">${paymentResponse.id}</span>
+//         `;
+//       },
+//       onChange: (paymentMethod: any) => {
+//         this.cd.detectChanges();
+//       },
+//       onError: (error: any, paymentMethod: any) => {
+//         const element = document.getElementById("error-message");
+//         if(element)
+//         element.innerHTML = `
+//           ${paymentMethod.name} error <br>
+//           Error occurred: <pre class="error-object">${error}</pre>
+//         `;
+//       },
+//     });
+
+//     const payments = checkoutWebComponents.create("payments");
+
+//     const form = document.getElementById("payment-form");
+
+//     if(form)
+
+//     form.addEventListener("submit", function (event) {
+//       event.preventDefault();
+//       payments.submit();
+//     });
+
+//     payments.mount(document.getElementById("payments"));
+    
+//   }
+// }
+
+
+
+
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CheckoutService } from 'src/app/services/checkout.service';
 import { from } from 'rxjs';
-
-
+import { environment } from 'src/environments/environment.sandbox';
+import { COUNTRIES, CURRENCIES } from 'src/app/data-store';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 declare var CheckoutWebComponents: any;
 
@@ -11,82 +126,99 @@ declare var CheckoutWebComponents: any;
   templateUrl: './payment-component.component.html',
   styleUrls: ['./payment-component.component.scss']
 })
-
 export class PaymentComponentComponent implements OnInit {
+  Currencies = CURRENCIES.map(currency => currency.iso4217);
+  Countries = COUNTRIES;
+  baseUrl = window.location.origin;
+  paymentSession: any; 
+  storedPayments: any;
 
-  constructor(private checkoutService: CheckoutService) { }
+  constructor(private checkoutService: CheckoutService, private cd: ChangeDetectorRef) {}
+
+  detailsForm = new FormGroup({
+    name: new FormControl('Syed Hasnain', [Validators.required, Validators.pattern('[a-zA-Z ]*')]),
+    email: new FormControl('smhasnain1996@gmail.com', [Validators.required, Validators.minLength(6), Validators.email]),
+    amount: new FormControl('1000', [Validators.required, Validators.max(50000)]),
+    currency: new FormControl('EUR', [Validators.required]),
+    country: new FormControl('DE', [Validators.required]),
+    threeDS: new FormControl(true),
+    capture: new FormControl(true)
+  });
 
   ngOnInit() {
-     this.initializePaymentForm();
+    // Initialize the payment form on component initialization
+    this.initializePaymentForm();
+    const form = document.getElementById("payment-form");
+    const instance = this;
+    if(form)
+     form.addEventListener("submit", function (event) {
+       event.preventDefault();
+       instance.storedPayments.submit();
+     });
   }
 
   async initializePaymentForm() {
-    let paymentSession = {};
-    let paymentSessionRequestBody = {
-      "amount": 1000,
-      "currency": "EUR",
-      "reference": "ORD-123A",
-      "billing": {
-        "address": {
-          "country": "DE"
+    // Build the payment session request based on form values
+    const paymentSessionRequestBody = {
+      amount: 1000,
+      currency: this.detailsForm.controls.currency.value,
+      reference: 'Order_' + Math.floor(Math.random() * 1000) + 1,
+      '3ds': {
+        enabled: this.detailsForm.controls.threeDS.value
+      },
+      capture: this.detailsForm.controls.capture.value,
+      billing: {
+        address: {
+          country: this.detailsForm.controls.country.value
         }
       },
-      "customer": {
-        "name": "John Smith",
-        "email": "john.smith@example.com"
+      customer: {
+        name: this.detailsForm.controls.name.value,
+        email: this.detailsForm.controls.email.value
       },
-      "success_url": "https://example.com/payments/success",
-      "failure_url": "https://example.com/payments/failure",
-      "processing_channel_id":"pc_oxr4t4p3nseejeqdjqk3pdlpm4"
+      success_url: `${this.baseUrl}/success`,
+      failure_url: `${this.baseUrl}/failure`,
+      processing_channel_id: environment.processingChannelId
+    };
+
+    // Make the API request and store the payment session
+    try {
+      const session = await from(this.checkoutService.requestPaymentSession(paymentSessionRequestBody)).toPromise();
+      this.paymentSession = session;
+
+      await this.initializeCheckoutWebComponents();
+    } catch (error) {
+      console.error('Error fetching payment session:', error);
     }
+  }
 
-   const session = await from(this.checkoutService.requestPaymentSession(paymentSessionRequestBody)).toPromise()
-   paymentSession = session;
-
-    const checkoutWebComponents = await CheckoutWebComponents({
-    
-      publicKey: "pk_sbox_7za2ppcb4pw7zzdkfzutahfjl4t",
-      environment: "sandbox",
-      paymentSession,
+  async initializeCheckoutWebComponents() {
+    const ckoComponent = await CheckoutWebComponents({
+      publicKey: environment.checkoutPublicKey,
+      environment: environment.environment,
+      paymentSession: this.paymentSession,
       onPaymentCompleted: (paymentResponse: any, paymentMethod: any) => {
-        const element = document.getElementById("successful-payment-message");
-        if(element)
-        element.innerHTML = `
-          ${paymentMethod.type} completed <br>
-          Your payment id is: <span class="payment-id">${paymentResponse.id}</span>
-        `;
+        const element = document.getElementById('successful-payment-message');
+        if (element) element.innerHTML = `${paymentMethod.type} payment completed <br>Your payment id is: <span class="payment-id">${paymentResponse.id}</span>`;
       },
-      onChange: (paymentMethod: any) => {
-        console.log("onValid:", paymentMethod.isValid(), " for ", paymentMethod.type);
+      onChange: (PaymentComponent: any) => {
+        console.log(PaymentComponent)
+        this.cd.detectChanges();
       },
       onError: (error: any, paymentMethod: any) => {
-        const element = document.getElementById("error-message");
-        if(element)
-        element.innerHTML = `
-          ${paymentMethod.name} error <br>
-          Error occurred: <pre class="error-object">${error}</pre>
-        `;
-      },
+        const element = document.getElementById('error-message');
+        if (element) element.innerHTML = `${paymentMethod.name} error <br>Error occurred: <pre class="error-object">${error}</pre>`;
+      }
     });
 
-    const payments = checkoutWebComponents.create("payments");
+    const payments = ckoComponent.create("payments");
 
-    const form = document.getElementById("payment-form");
-
-    if(form)
-
-    form.addEventListener("submit", function (event) {
-      event.preventDefault();
-      payments.submit();
-    });
-
-    payments.mount(document.getElementById("payments"));
+  if(this.storedPayments){
+    this.storedPayments.unmount();
+  }
+     this.storedPayments  =  payments.mount(document.getElementById("payments"));
   }
 }
-
-
-
-
 
 
 

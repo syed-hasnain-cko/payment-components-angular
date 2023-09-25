@@ -1,7 +1,93 @@
-<form id="payment-form">
+
+<br>
+<div class="container">
+    <div class = "row">
+
+    <div class = "col-6">
+        <div class="flex-container">
+    <form [formGroup]="detailsForm">
+ 
+        <div class ="row">
+          <div class="col-2">      
+            <label>Name:</label>  
+        </div>
+           <div class="col-4">      
+                <input type="text" class="input-box" id="name" formControlName="name">
+           </div>
+           <div class="col-1">      
+            <label>Email:</label>  
+        </div>
+           <div class="col-5">      
+                <input type="text" class="input-box" id="email" formControlName="email">
+           </div>
+           <div></div>
+        </div>  
+        <div class ="row">
+            <div class="col-2">      
+              <label>Amount:</label>  
+          </div>
+             <div class="col-4">      
+                  <input type="text" class="input-box" id="amount" formControlName="amount">
+             </div>
+             <div></div>
+          </div> 
+          <div class ="row">
+            <div class="col-2">      
+              <label>Currency:</label>  
+          </div>
+             <div class="col-4">      
+                <select class="input-box" id="currency" formControlName="currency" (change)="initializePaymentForm()">
+                    <option *ngFor="let count of Currencies" [value]="count">{{count}}</option>
+                  </select>
+             </div>
+             <div class="col-2">      
+              <label>Country:</label>  
+          </div>
+             <div class="col-4">      
+                <select class="input-box" id="country" formControlName="country" (change)="initializePaymentForm()">
+                    <option *ngFor="let count of Countries" [value]="count.alpha2Code">{{count.name}}</option>
+                  </select>
+             </div>
+             <div></div>
+          </div>  
+
+          <div class ="row">
+  
+            <div class="col-2">      
+              <label>Capture:</label>  
+          </div>
+            <div class="col-4">      
+                 <input type="checkbox" id="capture" formControlName="capture" (change)="initializePaymentForm()">
+            </div>
+         
+            
+            <div class="col-2">      
+              <label>3DS Enabled:</label>  
+          </div>
+            <div class="col-4">      
+                 <input type="checkbox" id="threeDS" formControlName="threeDS" (change)="initializePaymentForm()">
+            </div>
+     
+          </div>
+        </form>
+        </div>
+    </div>
+        <div class="col-6">
+        <form id="payment-form">
+            <div class="payments-container">
+                <div id="payments"></div>
+            </div>
+            <span id="error-message"></span>
+            <span id="successful-payment-message"></span>
+        </form>
+        </div>
+
+</div>
+</div>
+<!-- <form id="payment-form">
     <div class="payments-container">
         <div id="payments"></div>
     </div>
     <span id="error-message"></span>
     <span id="successful-payment-message"></span>
-</form>
+</form> -->
