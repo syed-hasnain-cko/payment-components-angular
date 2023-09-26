@@ -16,7 +16,9 @@ declare var CheckoutWebComponents: any;
 export class PaymentComponentComponent implements OnInit {
   Currencies = CURRENCIES.map(currency => currency.iso4217);
   Countries = COUNTRIES;
+  PaymentMethods = ['card','googlepay','applepay','sofort','eps','giropay','multibanco','ideal','knet','p24']
   baseUrl = window.location.origin;
+
   paymentSession: any; 
   storedPayments: any;
 
@@ -29,7 +31,8 @@ export class PaymentComponentComponent implements OnInit {
     currency: new FormControl('EUR', [Validators.required]),
     country: new FormControl('DE', [Validators.required]),
     threeDS: new FormControl(true),
-    capture: new FormControl(true)
+    capture: new FormControl(true),
+    disabledPaymentMethods: new FormControl([])
   });
 
   ngOnInit() {
@@ -45,6 +48,8 @@ export class PaymentComponentComponent implements OnInit {
   }
 
   async initializePaymentForm() {
+
+    console.log(this.detailsForm.controls.disabledPaymentMethods.value)
     // Build the payment session request based on form values
     const paymentSessionRequestBody = {
       amount: 1000,
@@ -65,8 +70,8 @@ export class PaymentComponentComponent implements OnInit {
       },
       success_url: `${this.baseUrl}/success`,
       failure_url: `${this.baseUrl}/failure`,
-      processing_channel_id: environment.processingChannelId
-      //disabled_payment_methods:['card','googlepay']
+      processing_channel_id: environment.processingChannelId,
+      disabled_payment_methods:this.detailsForm.controls.disabledPaymentMethods.value
     };
 
     // Make the API request and store the payment session

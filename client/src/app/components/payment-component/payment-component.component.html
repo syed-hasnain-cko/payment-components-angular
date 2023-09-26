@@ -69,6 +69,18 @@
             </div>
      
           </div>
+          <br>
+          <div class ="row">
+            <div class="col-3">      
+              <label>Disbale Payment Method:</label>  
+          </div>
+             <div class="col-4">      
+                <select class="input-box-apms" id="disabledPaymentMethods" formControlName="disabledPaymentMethods" (change)="initializePaymentForm()" multiple size="10">
+                    <option *ngFor="let count of PaymentMethods" [value]="count">{{count}}</option>
+                  </select>
+             </div>
+             <div></div>
+          </div> 
         </form>
         </div>
     </div>
@@ -84,10 +96,3 @@
 
 </div>
 </div>
-<!-- <form id="payment-form">
-    <div class="payments-container">
-        <div id="payments"></div>
-    </div>
-    <span id="error-message"></span>
-    <span id="successful-payment-message"></span>
-</form> -->
