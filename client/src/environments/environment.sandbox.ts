@@ -4,5 +4,12 @@ export const environment = {
     checkoutPublicKey:'pk_sbox_7za2ppcb4pw7zzdkfzutahfjl4t',
     checkoutSecretKey: 'Bearer sk_sbox_dqmcmja373yetcnwkrwi6x6biyv',
     processingChannelId: 'pc_oxr4t4p3nseejeqdjqk3pdlpm4',
-    baseUrl: 'https://api.sandbox.checkout.com'
+    baseUrl: 'https://api.sandbox.checkout.com',
+    payfacSK:'Bearer sk_sbox_3ey3h7ztz77fi4ecb3ujuykaam6',
+    payfacPK:'pk_sbox_vvrortf4yybe3wfmrel7mtyfwiq',
+    payfacPC:'pc_dkct5qotgkdu5fq2v3qlnvqs3q',
+    subEntityId: 'ent_atjissdryl33nqokxbd2ylcece',
+    mikiAccountSK:'Bearer sk_sbox_qa4gdkmyewciyizzwa55yxe3cm5',
+    mikiAccountPK:'pk_sbox_rwai36ei3nyftixria4sujwisqb',
+    mikiAccountPC:'pc_2ilb4bvor7gu7iziegmvlk7gse',
   };

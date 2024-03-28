@@ -27,7 +27,7 @@ export class PaymentComponentComponent implements OnInit {
   detailsForm = new FormGroup({
     name: new FormControl('Syed Hasnain', [Validators.required, Validators.pattern('[a-zA-Z ]*')]),
     email: new FormControl('smhasnain1996@gmail.com', [Validators.required, Validators.minLength(6), Validators.email]),
-    amount: new FormControl('1000', [Validators.required, Validators.max(50000)]),
+    amount: new FormControl('10', [Validators.required, Validators.max(50000)]),
     currency: new FormControl('EUR', [Validators.required]),
     country: new FormControl('DE', [Validators.required]),
     threeDS: new FormControl(true),
@@ -51,8 +51,8 @@ export class PaymentComponentComponent implements OnInit {
 
     console.log(this.detailsForm.controls.disabledPaymentMethods.value)
     // Build the payment session request based on form values
-    const paymentSessionRequestBody = {
-      amount: 1000,
+    const paymentSessionRequestBodyRegular = {
+      amount: 10,
       currency: this.detailsForm.controls.currency.value,
       reference: 'Order_' + Math.floor(Math.random() * 1000) + 1,
       '3ds': {
@@ -64,6 +64,12 @@ export class PaymentComponentComponent implements OnInit {
           country: this.detailsForm.controls.country.value
         }
       },
+      payment_type:'Regular',
+      payment_method_configuration: {
+        card: {
+           store_payment_details: "enabled"
+        }
+     },
       customer: {
         name: this.detailsForm.controls.name.value,
         email: this.detailsForm.controls.email.value
@@ -72,11 +78,72 @@ export class PaymentComponentComponent implements OnInit {
       failure_url: `${this.baseUrl}/failure`,
       processing_channel_id: environment.processingChannelId,
       disabled_payment_methods:this.detailsForm.controls.disabledPaymentMethods.value
+      
+    };
+
+    const paymentSessionRequestBodyRecurring = {
+      amount: 10,
+      currency: this.detailsForm.controls.currency.value,
+      reference: 'Order_' + Math.floor(Math.random() * 1000) + 1,
+      '3ds': {
+        enabled: this.detailsForm.controls.threeDS.value
+      },
+      capture: this.detailsForm.controls.capture.value,
+      billing: {
+        address: {
+          country: this.detailsForm.controls.country.value
+        }
+      },
+      payment_type:'Recurring',
+      payment_method_configuration: {
+        card: {
+           store_payment_details: "enabled"
+        }
+     },
+      customer: {
+        name: this.detailsForm.controls.name.value,
+        email: this.detailsForm.controls.email.value
+      },
+      success_url: `${this.baseUrl}/success`,
+      failure_url: `${this.baseUrl}/failure`,
+      processing_channel_id: environment.mikiAccountPC,
+      disabled_payment_methods:this.detailsForm.controls.disabledPaymentMethods.value
+      
+    };
+
+    const paymentSessionRequestBodyUnscheduled = {
+      amount: 10,
+      currency: this.detailsForm.controls.currency.value,
+      reference: 'Order_' + Math.floor(Math.random() * 1000) + 1,
+      '3ds': {
+        enabled: this.detailsForm.controls.threeDS.value
+      },
+      capture: this.detailsForm.controls.capture.value,
+      billing: {
+        address: {
+          country: this.detailsForm.controls.country.value
+        }
+      },
+      payment_type:'Unscheduled',
+      payment_method_configuration: {
+        card: {
+           store_payment_details: "enabled"
+        }
+     },
+      customer: {
+        name: this.detailsForm.controls.name.value,
+        email: this.detailsForm.controls.email.value
+      },
+      success_url: `${this.baseUrl}/success`,
+      failure_url: `${this.baseUrl}/failure`,
+      processing_channel_id: environment.mikiAccountPC,
+      disabled_payment_methods:this.detailsForm.controls.disabledPaymentMethods.value
+      
     };
 
     // Make the API request and store the payment session
     try {
-      const session = await from(this.checkoutService.requestPaymentSession(paymentSessionRequestBody)).toPromise();
+      const session = await from(this.checkoutService.requestPaymentSession(paymentSessionRequestBodyRegular)).toPromise();
       this.paymentSession = session;
 
       await this.initializeCheckoutWebComponents();
@@ -92,11 +159,15 @@ export class PaymentComponentComponent implements OnInit {
       paymentSession: this.paymentSession,
       onPaymentCompleted: (paymentMethod: any,paymentResponse: any) => {
         const element = document.getElementById('successful-payment-message');
+        console.log(paymentResponse)
         if (element) element.innerHTML = `${paymentMethod.type} payment completed <br>Your payment id is: <span class="payment-id">${paymentResponse.id}</span>`;
       },
       onChange: (PaymentComponent: any) => {
         console.log(PaymentComponent?.isValid())
         this.cd.detectChanges();
+      },
+      onSubmit:(PaymentComponent: any) =>{
+        console.log(PaymentComponent)
       },
       onError: (paymentMethod: any,error: any) => {
         const element = document.getElementById('error-message');
@@ -104,12 +175,19 @@ export class PaymentComponentComponent implements OnInit {
       }
     });
 
+   
     const payments = ckoComponent.create("payments");
+    
 
     if(this.storedPayments){
       this.storedPayments.unmount();
     }
-     this.storedPayments  =  payments.mount(document.getElementById("payments"));
+
+      this.storedPayments  =  payments.mount(document.getElementById("payments"));
+    
+     
+     
+     
   }
 }
 
